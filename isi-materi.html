@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Materi — Narrative Text</title>
+  <style>
+:root {
+    --secondary: #6BA4B8;
+    --light: #D8E6ED;
+    --dark: #2F3E46;
+    --text: #2F3E46;
+    --primary: #A7C7D9;
+    --hover: #4D869C;
+    --card-bg: #f8f5ee;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: var(--light);
+    color: var(--text);
+  }
+
+/* ===== HEADER ===== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    background-color: var(--primary);
+    position: relative;
+    z-index: 100;
+  }
+
+  header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  header .logo img {
+    width: 150px;
+    height: 150px;
+    margin: -50px;
+    margin-left: 10px;
+  }
+
+  .nav-menu {
+    display: flex;
+    gap: 10px;
+    margin-left: 0;
+  }
+
+  .nav-menu a {
+    text-decoration: none;
+    color: var(--dark);
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+
+  .nav-menu a.active,
+  .nav-menu a:hover {
+    background-color: var(--hover);
+    color: #fff;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .profile-circle {
+    background-color: var(--secondary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark);
+    font-size: 18px;
+    cursor: pointer;
+  }
+    
+  /* POPUP PROFIL */
+  .profile-popup {
+    position: absolute;
+    top: 75px;
+    right: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    width: 180px;
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  .profile-popup::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    width: 15px;
+    height: 15px;
+    background: white;
+    transform: rotate(45deg);
+  }
+
+  .popup-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .profile-icon {
+    font-size: 50px;
+    color: var(--secondary);
+  }
+
+  .logout-btn {
+    background-color: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .logout-btn:hover {
+    background-color: var(--hover);
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 1;
+  }
+
+  /* MENU ICON */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 25px;
+    height: 18px;
+    cursor: pointer;
+    z-index: 30;
+  }
+
+  .menu-toggle span {
+    height: 3px;
+    background: var(--dark);
+    border-radius: 2px;
+  }
+
+  /* Dropdown menu */
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    background-color: var(--light);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 150px;
+    z-index: 25;
+  }
+
+  .dropdown-menu a {
+    padding: 10px 16px;
+    color: var(--dark);
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .dropdown-menu a:last-child {
+    border-bottom: none;
+  }
+
+  .dropdown-menu a:hover,
+  .dropdown-menu a.active {
+    background-color: var(--secondary);
+    color: #fff;
+  }
+
+  .overlay2 {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 15;
+  }
+
+  .overlay2.show {
+    display: block;
+  }
+
+  .dropdown-menu .logout-btn {
+  display: block;
+  text-align: center;
+  margin: 8px;
+  background-color: var(--secondary);
+  color: white;
+  border-radius: 15px;
+  padding: 7px 0;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.dropdown-menu .logout-btn:hover {
+  background-color: var(--hover);
+}
+
+  /* === SIDEBAR === */
+  .menu-btn {
+    position: absolute;
+    top: 80px;
+    border: none;
+    border-radius: 0px 30px 30px 0px;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+
+  .menu-btn img {
+    width: 25px;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 70px;
+    left: -260px;
+    width: 250px;
+    height: 99.5%;
+    background-color: #fff;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease;
+    padding-top: 70px;
+    z-index: 999;
+    overflow-y: auto;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .dropdown {
+    border-bottom: 1px solid #e1d6f6;
+  }
+
+  .dropdown-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 25px;
+    font-size: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+  }
+
+  .dropdown-btn:hover {
+    background-color: var(--secondary);
+    color: white;
+  }
+
+  .dropdown-content {
+    display: none;
+    background-color: #f8f5fc;
+  }
+
+  .dropdown-content a {
+    display: block;
+    padding: 10px 40px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+
+  .dropdown-content a:hover {
+    background-color: var(--hover);
+    color: white;
+  }
+
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
+
+  /* === MAIN === */
+  main {
+    padding: 40px 50px;
+    max-width: 850px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    text-align: center;
+    color: var(--dark);
+  }
+
+  iframe.video-container {
+    display: block;
+    margin: 20px auto;
+    width: 100%;
+    height: 360px;
+    max-width: 700px;
+    border-radius: 12px;
+    border: none;
+  }
+
+/* === MENU TITIK TIGA === */
+.menu-edit {
+  position: absolute;
+  right: 20px;
+  top: 85px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.menu-edit img {
+  width: 35px;
+  height: 35px;
+  transition: transform 0.2s;
+}
+
+.menu-edit img:hover {
+  transform: scale(1.1);
+}
+
+/* Menu yang muncul setelah klik */
+.menu-options {
+  position: absolute;
+  top: 40px;
+  right: 20px;
+  background: var(--secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  animation: fadeIn 0.2s ease;
+}
+
+.menu-options a {
+  color: var(--dark);
+  padding: 8px 14px;
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s;
+  border-radius: 6px;
+  white-space: nowrap; /* ⬅️ teks tetap satu baris */
+}
+
+.menu-options a:hover {
+  background: var(--hover);
+  color: var(--light);
+}
+
+/* Animasi */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+  /* === FOOTER === */
+  footer {
+    background-color: var(--primary);
+    color: var(--dark);
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 40px 20px;
+  }
+
+  .footer-logo img {
+    width: 40px;
+    height: 40px;
+    transform: scale(4);
+    transform-origin: 6px;
+  }
+
+  footer .left, footer .right {
+    width: 300px;
+    max-width: 90%;
+    color: var(--dark);
+  }
+
+  footer p {
+    font-size: 0.9em;
+    line-height: 1.6;
+  }
+
+  .socials {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .socials img {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+  }
+
+  .footer-bottom {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85em;
+    background-color: var(--primary);
+    border-top: 1px solid #CBD7DD;
+    color: var(--dark);
+  }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .materi-grid {
+    gap: 25px;
+  }
+
+  .nav-menu {
+    display: none;
+  }
+
+  .header-right{
+    display: none;
+  }
+
+  header .logo img {
+    margin-left: -20px;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .dropdown-menu.show {
+    display: flex;
+  }
+
+  .sidebar {
+    height: 147vh;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <img src="ExploreIpa.png" alt="Logo">
+    </div>
+   
+    <nav class="nav-menu">
+      <a href="../dashboard/index.html">Beranda</a>
+      <a href="../KelolaMateri(GURU)/kelola-materi.html" class="active">Materi</a>
+      <a href="../latihan/listlatihan.html">Latihan</a>
+      <a href="../leaderboard/listleaderboard.html">Leaderboard</a>
+    </nav>
+
+    <!-- Ganti id agar tidak bentrok -->
+    <div class="menu-toggle" id="menuButton">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+<!-- DROPDOWN MENU MOBILE -->
+<div class="dropdown-menu" id="dropdown-menu">
+  <a href="../dashboard/index.html">🏠 Beranda</a>
+  <a href="../KelolaMateri(GURU)/kelola-materi.html" class="active">📘 Materi</a>
+  <a href="../latihan/listlatihan.html">📝 Latihan</a>
+  <a href="../leaderboard/listleaderboard.html">🎮 Leaderboard</a>
+  <a href="../login/login.html" class="logout-btn">Logout</a>
+</div>
+
+  
+    <div class="header-right desktop">
+      <div class="welcome">
+        <span><b>Selamat Datang</b></span><br>
+        <small>Ibu Soraya</small>
+      </div>
+      <div class="profile-circle" id="profileBtn">👤</div>
+      <div class="profile-popup" id="profilePopup">
+        <div class="popup-content">
+          <i class="profile-icon">👤</i>
+          <p class="profile-name">Ibu Soraya</p>
+          <a href="../login/login.html" class="logout-btn">Logout</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="overlay2" id="overlay2"></div>
+
+<!-- TOMBOL & SIDEBAR -->
+<button class="menu-btn" id="menuBtn">
+  <img src="List.svg" alt="menu">
+</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="dropdown">
+    <button class="dropdown-btn">BAB 1 <span>▼</span></button>
+    <div class="dropdown-content">
+      <a href="#">Materi 1</a>
+      <a href="#">Materi 2</a>
+      <a href="#">Materi 3</a>
+      <a href="#">Materi 4</a>
+    </div>
+  </div>
+  <div class="dropdown">
+    <button class="dropdown-btn">BAB 2 <span>▼</span></button>
+    <div class="dropdown-content">
+      <a href="#">Materi 1</a>
+      <a href="#">Materi 2</a>
+      <a href="#">Materi 3</a>
+      <a href="#">Materi 4</a>
+    </div>
+  </div>
+  <div class="dropdown">
+    <button class="dropdown-btn">BAB 3 <span>▼</span></button>
+    <div class="dropdown-content">
+      <a href="#">Materi 1</a>
+      <a href="#">Materi 2</a>
+      <a href="#">Materi 3</a>
+      <a href="#">Materi 4</a>
+    </div>
+  </div>
+</div>
+
+<div class="menu-edit">
+  <img src="Rectangle 287.svg" alt="Menu" id="menuIcon">
+  <div class="menu-options" id="menuOptions">
+    <a href="edit-materi.html">Edit Materi</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main id="main-content">
+  <h2>Introduction to Narrative Text</h2>
+  <p>
+    A Narrative Text is a type of writing that aims to tell a story, whether it’s fiction (like fairy tales and fables)
+    or non-fiction (like biographies), with the main purpose of entertaining the reader.
+  </p>
+
+<iframe class="video-container" src="https://www.youtube.com/embed/cmpRLQZkTb8?si=poVWyBjpPNZSJrgx" allowfullscreen></iframe>
+
+  <p><b>1. The Purpose: What’s the Goal?</b><br>
+    The purpose of a Narrative Text is simple: to entertain the reader. Imagine yourself as a movie director.
+  </p>
+
+  <p><b>2. The Structure:</b> Every story has an orientation, complication, and resolution.</p>
+
+  <p><b>3. Language Focus:</b> Use past tense verbs and time connectors like then, after that, finally.</p>
+</main>
+
+<!-- FOOTER -->
+ <footer>
+    <div class="left">
+      <div class="footer-logo">
+        <img src="ExploreIpa.png" alt="Logo ExploreIPA">
+      </div>
+      <p>Tempat belajar IPA secara digital, interaktif, dan pastinya menyenangkan!.</p>
+      <img src="smpn3.png" alt="Logo sekolah" width="70">
+    </div>
+    
+  
+    <div class="right">
+      <h3>Kontak & Sosial Media</h3>
+      <p>📞 +62 812 3456 7890<br>
+      ✉️ GrowEducation@gmail.com<br>
+      📍 Jl. H. Hasan Basri</p>
+      <div class="socials">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram">
+        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" alt="TikTok">
+      </div>
+    </div>
+  </footer>
+
+  <div class="footer-bottom">
+    © 2025 GrowEducation
+  </div>
+
+  <script>
+    /* === PROFILE POPUP === */
+    const profileBtn = document.getElementById("profileBtn");
+    const profilePopup = document.getElementById("profilePopup");
+    const overlayProfile = document.getElementById("overlay");
+    
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const visible = profilePopup.style.display === "block";
+      profilePopup.style.display = visible ? "none" : "block";
+      overlayProfile.style.display = visible ? "none" : "block";
+    });
+    
+    overlayProfile.addEventListener("click", () => {
+      profilePopup.style.display = "none";
+      overlayProfile.style.display = "none";
+    });
+    
+    document.addEventListener("click", (e) => {
+      if (!profilePopup.contains(e.target) && !profileBtn.contains(e.target)) {
+        profilePopup.style.display = "none";
+        overlayProfile.style.display = "none";
+      }
+    });
+    
+    /* === DROPDOWN MENU MOBILE === */
+    const menuButton = document.getElementById('menuButton');
+    const menu = document.getElementById('dropdown-menu');
+    const overlay2 = document.getElementById('overlay2');
+    
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('show');
+      overlay2.classList.toggle('show');
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
+        menu.classList.remove('show');
+        overlay2.classList.remove('show');
+      }
+    });
+    
+    /* === SIDEBAR === */
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle("active");
+    });
+    
+    /* Klik luar sidebar untuk menutup */
+    document.addEventListener("click", (e) => {
+      if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove("active");
+      }
+    });
+    
+    /* === MENU TITIK TIGA EDIT === */
+    const menuIcon = document.getElementById("menuIcon");
+    const menuOptions = document.getElementById("menuOptions");
+    
+    menuIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menuOptions.style.display =
+        menuOptions.style.display === "flex" ? "none" : "flex";
+    });
+    
+    document.addEventListener("click", (e) => {
+      if (!menuOptions.contains(e.target) && e.target !== menuIcon) {
+        menuOptions.style.display = "none";
+      }
+    });
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pengelola Materi — Editor Per Paragraf (with Media)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{
+    --secondary: #6BA4B8;
+    --light: #D8E6ED;
+    --dark: #2F3E46;
+    --text: #2F3E46;
+    --primary: #A7C7D9;
+    --hover: #4D869C;
+    --card-bg: #f8f5ee;
+  }
+  body{
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: var(--light);
+    margin:0; padding:32px; color:#222;
+  }
+  .container{ max-width:980px; margin:0 auto; }
+  h1{ font-size:28px; margin:6px 0 18px; }
+  header a { color: black; }
+  .title-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .title-row .materi-title{ font-weight:600; font-style:italic; color:var(--dark); }
+  .card{
+    background:var(--card-bg); border-radius:12px; padding:18px; box-shadow:0 2px 6px rgba(16,12,40,0.06);
+    margin-bottom:14px; border:1px solid rgba(16,12,40,0.04); 
+  }
+  .card-header{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .card-header h3{ margin:0; font-size:18px; }
+  .card-preview{ margin-top:12px; color:#333; line-height:1.45; }
+  .btn-row{ display:flex; gap:8px; align-items:center; }
+  button, .btn {
+    background:transparent; border:1px solid rgba(0,0,0,0.08); padding:8px 12px; border-radius:8px; cursor:pointer;
+  }
+  .btn.primary{ background:linear-gradient(180deg,var(--primary),var(--secondary)); color:white; border:none; }
+  .btn.ghost{ background:#fff; }
+  .edit-form{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+  .form-input, .form-textarea{
+    width:97%; padding:12px; border-radius:10px; border:1px solid rgba(0,0,0,0.09); font-size:15px;
+  }
+  .form-textarea{ min-height:110px; resize:vertical; }
+  .small-muted{ color:var(--muted); font-size:13px; }
+  .add-paragraph{
+    margin-top:14px; display:flex; justify-content:center;
+  }
+
+  /* media preview */
+  .media-preview img, .media-preview video{ max-width:100%; border-radius:8px; display:block; margin-top:10px; }
+  .media-controls{ margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .media-controls input[type="text"]{ padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.08); min-width:220px; }
+
+  /* Fullscreen modal (improved) */
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(12,10,20,0.55);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+    z-index:60;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal{
+    width:95%; max-width:960px;
+    background: #ffffff;
+    border-radius:16px;
+    padding:24px 28px 28px;
+    color:#111;
+    box-shadow:0 12px 50px rgba(0,0,0,0.25);
+    animation: modalFade 0.25s ease;
+    display:flex;
+    flex-direction:column;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+
+  @keyframes modalFade {
+    from { transform:scale(0.96); opacity:0; }
+    to { transform:scale(1); opacity:1; }
+  }
+
+  .modal h2{
+    margin:0 0 6px;
+    font-size:22px;
+    color:var(--dark);
+  }
+
+  .modal .status{
+    font-size:14px;
+    color:#888;
+  }
+
+  .modal .editor-area{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-top:14px;
+  }
+
+  .modal label.small-muted{
+    font-size:14px;
+    color:#666;
+  }
+
+  .modal .form-input{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid rgba(0,0,0,0.1);
+    border-radius:8px;
+    font-size:15px;
+  }
+
+  .modal .toolbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:6px 0;
+  }
+
+  .modal .toolbar button{
+    background:var(--light);
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  .modal .toolbar button:hover{
+    background:var(--secondary);
+    color:#fff;
+  }
+
+  .modal .full-textarea{
+    min-height:320px;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,0.1);
+    font-size:15px;
+    line-height:1.6;
+    resize:vertical;
+    background:#fff;
+  }
+
+  .modal .media-controls{
+    margin-top:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .modal .media-preview img,
+  .modal .media-preview video{
+    max-width:100%;
+    border-radius:8px;
+    margin-top:10px;
+  }
+
+  .modal .modal-actions{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    border-top:1px solid rgba(0,0,0,0.08);
+    padding-top:16px;
+  }
+
+  @media (max-width:720px){
+    .modal{
+      padding:18px;
+      width:96%;
+      border-radius:12px;
+      max-height:92vh;
+    }
+    .modal .full-textarea{
+      min-height:240px;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="title-row">
+      <div>
+        <h1><a href="../KelolaMateri(GURU)/kelola-materi.html"><i class="fa-solid fa-arrow-left"></i></a> Pengelola Materi</h1>
+        <div class="small-muted">
+          Judul Materi:
+          <span class="materi-title" id="materiTitle">Isi Judul</span>
+
+          <!-- EDIT TITLE BUTTON (added) -->
+          <span class="title-actions" id="titleActions">
+            <button class="btn" id="editTitleBtn">Edit Judul</button>
+          </span>
+
+          <!-- small inline status for title save -->
+          <span id="titleStatus" class="status" style="display:none; margin-left:8px;"></span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="previewBtn">Pratinjau Materi</button>
+      </div>
+    </div>
+
+    <div id="paragraphList">
+      <!-- Cards will be injected here -->
+    </div>
+
+    <div class="add-paragraph">
+      <button class="btn primary" id="addParagraphBtn">+ Tambah Paragraf Baru</button>
+    </div>
+  </div>
+
+  <!-- Fullscreen modal editor -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <a href="#" id="closeModal" style="text-decoration:none; color:#222;">← Kembali ke Daftar Paragraf</a>
+          <h2 id="modalTitle">✏️ Edit Paragraf</h2>
+        </div>
+        <div class="status" id="modalStatus">Belum disimpan</div>
+      </div>
+
+      <div class="editor-area">
+        <label class="small-muted">Judul Paragraf</label>
+        <input id="modalTitleInput" class="form-input" type="text" />
+
+        <label class="small-muted">Isi Paragraf</label>
+        <div class="toolbar" id="modalToolbar">
+          <button class="btn" data-act="bold"><b>B</b></button>
+          <button class="btn" data-act="italic"><i>I</i></button>
+          <button class="btn" data-act="ul">• List</button>
+          <button class="btn" data-act="clear">Clear</button>
+        </div>
+        <textarea id="modalTextarea" class="full-textarea" spellcheck="true"></textarea>
+
+        <!-- media controls in modal -->
+        <div style="margin-top:8px">
+          <div class="small-muted">Media Paragraf (maks 1)</div>
+          <div class="media-controls" id="modalMediaControls">
+            <input type="file" id="modalFileInput" accept="image/*,video/*" style="display:none" />
+            <button class="btn" id="modalUploadBtn">Upload dari Perangkat</button>
+            <input type="text" id="modalUrlInput" placeholder="Tempel URL gambar/video di sini" />
+            <button class="btn" id="modalUseUrlBtn">Gunakan URL</button>
+            <button class="btn" id="modalRemoveMediaBtn" style="display:none">Hapus Media</button>
+          </div>
+          <div class="media-preview" id="modalMediaPreview"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn" id="modalCancel">Batal</button>
+          <button class="btn primary" id="modalSave">Simpan Perubahan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  Perubahan utama: menambahkan tombol Edit Judul di sebelah Judul Materi,
+  yang membuka input inline + tombol Simpan & Batal, dan menyimpan ke localStorage.
+  Semua fitur paragraf/media tetap utuh.
+*/
+
+const STORAGE_KEY = 'materi-paragraphs';
+const TITLE_KEY = 'materi-title';
+
+let paragraphs = [
+  { id: genId(), title: 'Tujuan Narrative Text', content: 'A Narrative Text is a type of writing that aims to tell a story. The main purpose is to entertain the reader.', media: null },
+  { id: genId(), title: 'Struktur: Building Blocks', content: 'Every good story needs a strong foundation, which we call the Generic Structure. It has three main parts: Orientation, Complication, Resolution.', media: null },
+  { id: genId(), title: 'Language Focus: Tense and Time', content: 'Because you are telling something that happened in the past, use the Simple Past Tense. Conjunctions like Then, Suddenly coordinate events.', media: null }
+];
+
+function genId(){ return 'p'+Math.random().toString(36).slice(2,9); }
+
+// load paragraphs from storage if exists
+try {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw) paragraphs = JSON.parse(raw);
+} catch(e){ console.warn('localStorage read failed', e); }
+
+// --- TITLE: load stored title (if any)
+const materiTitleSpan = document.getElementById('materiTitle');
+const editTitleBtn = document.getElementById('editTitleBtn');
+const titleActions = document.getElementById('titleActions');
+const titleStatus = document.getElementById('titleStatus');
+
+try {
+  const storedTitle = localStorage.getItem(TITLE_KEY);
+  if(storedTitle) materiTitleSpan.textContent = storedTitle;
+} catch(e){ console.warn('read title failed', e); }
+
+// function to show transient status next to title
+function showTitleStatus(text, timeout = 1800){
+  titleStatus.textContent = text;
+  titleStatus.style.display = 'inline-block';
+  setTimeout(()=> { titleStatus.style.display = 'none'; titleStatus.textContent = ''; }, timeout);
+}
+
+// Edit title flow (inline, without replacing the span element permanently)
+editTitleBtn.addEventListener('click', ()=> {
+  // If already in edit mode (button text is 'Simpan'), act as save
+  if(editTitleBtn.dataset.mode === 'editing'){
+    const input = document.getElementById('materiTitleInput');
+    if(!input) return;
+    const newTitle = input.value.trim() || 'Tanpa Judul';
+    // save to storage
+    try { localStorage.setItem(TITLE_KEY, newTitle); } catch(e){ console.warn('save title failed', e); }
+    // update span
+    materiTitleSpan.textContent = newTitle;
+    // clean up UI: remove input & cancel, restore button
+    input.remove();
+    const cancelBtn = document.getElementById('cancelTitleBtn');
+    if(cancelBtn) cancelBtn.remove();
+    editTitleBtn.textContent = 'Edit Judul';
+    editTitleBtn.dataset.mode = '';
+    showTitleStatus('Judul tersimpan ✅', 1600);
+    return;
+  }
+
+  // Not editing: switch to edit mode
+  const current = materiTitleSpan.textContent.trim();
+  // create input next to span (inline)
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'materiTitleInput';
+  input.value = current;
+  input.className = '';
+  input.style.marginLeft = '8px';
+  input.style.padding = '6px 8px';
+  input.style.borderRadius = '8px';
+  input.style.border = '1px solid rgba(0,0,0,0.08)';
+  input.style.fontSize = '14px';
+  // insert input after the span
+  materiTitleSpan.insertAdjacentElement('afterend', input);
+  // create cancel button
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn';
+  cancelBtn.id = 'cancelTitleBtn';
+  cancelBtn.textContent = 'Batal';
+  cancelBtn.style.marginLeft = '6px';
+  titleActions.appendChild(cancelBtn);
+  // change edit button to Save state
+  editTitleBtn.textContent = 'Simpan';
+  editTitleBtn.dataset.mode = 'editing';
+  input.focus();
+  input.select();
+
+  // cancel behavior
+  cancelBtn.addEventListener('click', ()=> {
+    // remove input and cancel button, restore button label
+    input.remove();
+    cancelBtn.remove();
+    editTitleBtn.textContent = 'Edit Judul';
+    editTitleBtn.dataset.mode = '';
+  });
+
+  // allow Enter key to save
+  input.addEventListener('keydown', (ev) => {
+    if(ev.key === 'Enter'){
+      ev.preventDefault();
+      editTitleBtn.click(); // trigger save branch
+    } else if(ev.key === 'Escape'){
+      // cancel on Esc
+      const cb = document.getElementById('cancelTitleBtn');
+      if(cb) cb.click();
+    }
+  });
+});
+
+// END TITLE FEATURE
+
+const paragraphList = document.getElementById('paragraphList');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalTextarea = document.getElementById('modalTextarea');
+const modalTitleInput = document.getElementById('modalTitleInput');
+const modalTitle = document.getElementById('modalTitle');
+const modalStatus = document.getElementById('modalStatus');
+let editingId = null;
+
+function renderList(){
+  paragraphList.innerHTML = '';
+  paragraphs.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.id = p.id;
+
+    const mediaHtml = p.media ? renderMediaHtml(p.media) : '';
+
+    card.innerHTML = `
+      <div class="card-header">
+        <h3>[${idx+1}] ${escapeHtml(p.title)}</h3>
+        <div class="btn-row">
+          <button class="btn" data-action="edit-inline">Edit</button>
+          <button class="btn" data-action="delete">Hapus</button>
+        </div>
+      </div>
+      <div class="card-preview">${escapeHtml(truncate(p.content, 240))}${mediaHtml}</div>
+      <div class="edit-area hidden"></div>
+    `;
+    paragraphList.appendChild(card);
+
+    // wire actions
+    card.querySelector('[data-action="edit-inline"]').addEventListener('click',()=>{
+      openInlineEditor(p.id, card);
+    });
+    card.querySelector('[data-action="delete"]').addEventListener('click',()=>{
+      if(confirm('Yakin ingin menghapus paragraf ini?')) {
+        paragraphs = paragraphs.filter(x=>x.id!==p.id);
+        persist(); renderList();
+      }
+    });
+  });
+}
+
+function renderMediaHtml(media){
+  // media: { type: 'image'|'video', src: string, source: 'file'|'url' }
+  if(!media) return '';
+  // render small preview inside card-preview (below truncated text)
+  if(media.type === 'image'){
+    return `<div class="media-preview"><img src="${escapeAttr(media.src)}" alt="media" /></div>`;
+  } else if(media.type === 'video'){
+    return `<div class="media-preview"><video src="${escapeAttr(media.src)}" controls></video></div>`;
+  }
+  return '';
+}
+
+function openInlineEditor(id, card){
+  // close other
+  document.querySelectorAll('.edit-area').forEach(el=>el.classList.add('hidden'));
+  const p = paragraphs.find(x=>x.id===id);
+  if(!p) return;
+  const editArea = card.querySelector('.edit-area');
+  editArea.classList.remove('hidden');
+
+  const hasMedia = !!p.media;
+  const mediaPreviewHtml = p.media ? (p.media.type === 'image' ? `<img src="${escapeAttr(p.media.src)}" />` : `<video src="${escapeAttr(p.media.src)}" controls></video>`) : '';
+
+  editArea.innerHTML = `
+    <div class="edit-form">
+      <label class="small-muted">Judul Paragraf</label>
+      <input class="form-input" id="in-title-${id}" value="${escapeAttr(p.title)}" />
+      <label class="small-muted">Isi Paragraf</label>
+      <textarea class="form-textarea" id="in-content-${id}">${escapeAttr(p.content)}</textarea>
+
+      <div style="margin-top:8px">
+        <div class="small-muted">Media Paragraf (maks 1)</div>
+        <div class="media-controls" id="controls-${id}">
+          <input type="file" id="file-${id}" accept="image/*,video/*" style="display:none" />
+          <button class="btn" id="btn-upload-${id}" ${hasMedia? 'disabled' : ''}>Upload dari Perangkat</button>
+          <input type="text" id="url-${id}" placeholder="Tempel URL gambar/video di sini" ${hasMedia? 'disabled' : ''} />
+          <button class="btn" id="btn-url-${id}" ${hasMedia? 'disabled' : ''}>Gunakan URL</button>
+          <button class="btn" id="btn-remove-${id}" style="display:${hasMedia? 'inline-block':'none'}">Hapus Media</button>
+        </div>
+        <div class="media-preview" id="preview-${id}">${mediaPreviewHtml}</div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
+        <button class="btn primary" id="in-save-${id}">Simpan Perubahan</button>
+        <button class="btn" id="in-full-${id}">🔳 Edit di Layar Penuh</button>
+        <button class="btn" id="in-cancel-${id}">Batal</button>
+        <div class="status" id="in-status-${id}"></div>
+      </div>
+    </div>
+  `;
+
+  // listeners
+  const fileInput = document.getElementById(`file-${id}`);
+  const btnUpload = document.getElementById(`btn-upload-${id}`);
+  const urlInput = document.getElementById(`url-${id}`);
+  const btnUrl = document.getElementById(`btn-url-${id}`);
+  const btnRemove = document.getElementById(`btn-remove-${id}`);
+  const preview = document.getElementById(`preview-${id}`);
+
+  btnUpload.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    // basic validation
+    if(!file.type.startsWith('image') && !file.type.startsWith('video')){
+      alert('Tipe tidak didukung. Pilih gambar atau video.');
+      fileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const dataUrl = ev.target.result;
+      const type = file.type.startsWith('image') ? 'image' : 'video';
+      p.media = { type, src: dataUrl, source: 'file' };
+      // disable controls
+      btnUpload.disabled = true; urlInput.disabled = true; btnUrl.disabled = true; btnRemove.style.display = 'inline-block';
+      // show preview
+      preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(dataUrl)}" />` : `<video src="${escapeAttr(dataUrl)}" controls></video>`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  btnUrl.addEventListener('click', ()=>{
+    const url = urlInput.value.trim();
+    if(!url){ alert('Masukkan URL terlebih dahulu.'); return; }
+    // naive type detection by extension
+    const lower = url.split('?')[0].toLowerCase();
+    const isImage = /\.(png|jpe?g|gif|webp|svg)$/i.test(lower);
+    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(lower);
+    const type = isVideo ? 'video' : 'image';
+    p.media = { type, src: url, source: 'url' };
+    btnUpload.disabled = true; urlInput.disabled = true; btnUrl.disabled = true; btnRemove.style.display = 'inline-block';
+    preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(url)}" />` : `<video src="${escapeAttr(url)}" controls></video>`;
+  });
+
+  btnRemove.addEventListener('click', ()=>{
+    if(!p.media) return;
+    if(confirm('Hapus media paragraf ini?')){
+      p.media = null;
+      preview.innerHTML = '';
+      btnUpload.disabled = false; urlInput.disabled = false; btnUrl.disabled = false; btnRemove.style.display = 'none';
+    }
+  });
+
+  document.getElementById(`in-cancel-${id}`).addEventListener('click',()=>{
+    editArea.classList.add('hidden');
+  });
+  document.getElementById(`in-save-${id}`).addEventListener('click', ()=>{
+    const newT = document.getElementById(`in-title-${id}`).value.trim();
+    const newC = document.getElementById(`in-content-${id}`).value.trim();
+    p.title = newT || 'Untitled';
+    p.content = newC;
+    persist(); renderList();
+  });
+  document.getElementById(`in-full-${id}`).addEventListener('click', ()=>{
+    openFullEditor(id);
+  });
+}
+
+function openFullEditor(id){
+  const p = paragraphs.find(x=>x.id===id);
+  if(!p) return;
+  editingId = id;
+  modalTitle.textContent = `✏️ Edit Paragraf ${getIndex(id)}: ${p.title}`;
+  modalTitleInput.value = p.title;
+  modalTextarea.value = p.content;
+  modalStatus.textContent = 'Belum disimpan';
+
+  // setup modal media controls
+  const fileInput = document.getElementById('modalFileInput');
+  const uploadBtn = document.getElementById('modalUploadBtn');
+  const urlInput = document.getElementById('modalUrlInput');
+  const useUrlBtn = document.getElementById('modalUseUrlBtn');
+  const removeBtn = document.getElementById('modalRemoveMediaBtn');
+  const preview = document.getElementById('modalMediaPreview');
+
+  // reset inputs
+  fileInput.value = ''; urlInput.value = '';
+  preview.innerHTML = '';
+  if(p.media){
+    // show preview and hide/disable controls
+    preview.innerHTML = p.media.type === 'image' ? `<img src="${escapeAttr(p.media.src)}" />` : `<video src="${escapeAttr(p.media.src)}" controls></video>`;
+    uploadBtn.disabled = true; urlInput.disabled = true; useUrlBtn.disabled = true; removeBtn.style.display = 'inline-block';
+  } else {
+    uploadBtn.disabled = false; urlInput.disabled = false; useUrlBtn.disabled = false; removeBtn.style.display = 'none';
+  }
+
+  uploadBtn.onclick = () => fileInput.click();
+  fileInput.onchange = (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    if(!file.type.startsWith('image') && !file.type.startsWith('video')){ alert('Tipe tidak didukung.'); fileInput.value=''; return; }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const dataUrl = ev.target.result;
+      const type = file.type.startsWith('image') ? 'image' : 'video';
+      p.media = { type, src: dataUrl, source: 'file' };
+      preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(dataUrl)}" />` : `<video src="${escapeAttr(dataUrl)}" controls></video>`;
+      uploadBtn.disabled = true; urlInput.disabled = true; useUrlBtn.disabled = true; removeBtn.style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  useUrlBtn.onclick = ()=>{
+    const url = urlInput.value.trim(); if(!url){ alert('Masukkan URL terlebih dahulu.'); return; }
+    const lower = url.split('?')[0].toLowerCase();
+    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(lower);
+    const type = isVideo ? 'video' : 'image';
+    p.media = { type, src: url, source: 'url' };
+    preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(url)}" />` : `<video src="${escapeAttr(url)}" controls></video>`;
+    uploadBtn.disabled = true; urlInput.disabled = true; useUrlBtn.disabled = true; removeBtn.style.display = 'inline-block';
+  };
+
+  removeBtn.onclick = ()=>{
+    if(!p.media) return;
+    if(confirm('Hapus media paragraf ini?')){
+      p.media = null; preview.innerHTML = ''; uploadBtn.disabled = false; urlInput.disabled = false; useUrlBtn.disabled = false; removeBtn.style.display = 'none';
+    }
+  };
+
+  modalBackdrop.style.display = 'flex';
+  modalBackdrop.setAttribute('aria-hidden','false');
+  modalTextarea.focus();
+}
+
+// modal controls
+function openInlineEditor(id, card){
+  // Tutup editor lain yang sedang terbuka
+  document.querySelectorAll('.edit-area').forEach(el=>el.classList.add('hidden'));
+
+  const p = paragraphs.find(x=>x.id===id);
+  if(!p) return;
+  const editArea = card.querySelector('.edit-area');
+  editArea.classList.remove('hidden');
+
+  // Simpan salinan data asli (untuk tombol batal)
+  const original = JSON.parse(JSON.stringify(p));
+
+  const hasMedia = !!p.media;
+  const mediaPreviewHtml = p.media ? 
+    (p.media.type === 'image' 
+      ? `<img src="${escapeAttr(p.media.src)}" />` 
+      : `<video src="${escapeAttr(p.media.src)}" controls></video>`) 
+    : '';
+
+  editArea.innerHTML = `
+    <div class="edit-form">
+      <label class="small-muted">Judul Paragraf</label>
+      <input class="form-input" id="in-title-${id}" value="${escapeAttr(p.title)}" />
+      <label class="small-muted">Isi Paragraf</label>
+      <textarea class="form-textarea" id="in-content-${id}">${escapeAttr(p.content)}</textarea>
+
+      <div style="margin-top:8px">
+        <div class="small-muted">Media Paragraf (maks 1)</div>
+        <div class="media-controls" id="controls-${id}">
+          <input type="file" id="file-${id}" accept="image/*,video/*" style="display:none" />
+          <button class="btn" id="btn-upload-${id}" ${hasMedia? 'disabled' : ''}>Upload dari Perangkat</button>
+          <input type="text" id="url-${id}" placeholder="Tempel URL gambar/video di sini" ${hasMedia? 'disabled' : ''} />
+          <button class="btn" id="btn-url-${id}" ${hasMedia? 'disabled' : ''}>Gunakan URL</button>
+          <button class="btn" id="btn-remove-${id}" style="display:${hasMedia? 'inline-block':'none'}">Hapus Media</button>
+        </div>
+        <div class="media-preview" id="preview-${id}">${mediaPreviewHtml}</div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
+        <button class="btn primary" id="in-save-${id}">Simpan Perubahan</button>
+        <button class="btn" id="in-full-${id}">🔳 Edit di Layar Penuh</button>
+        <button class="btn" id="in-cancel-${id}">Batal</button>
+        <div class="status" id="in-status-${id}"></div>
+      </div>
+    </div>
+  `;
+
+  // --- Fungsi media upload & preview ---
+  const fileInput = document.getElementById(`file-${id}`);
+  const btnUpload = document.getElementById(`btn-upload-${id}`);
+  const urlInput = document.getElementById(`url-${id}`);
+  const btnUrl = document.getElementById(`btn-url-${id}`);
+  const btnRemove = document.getElementById(`btn-remove-${id}`);
+  const preview = document.getElementById(`preview-${id}`);
+
+  btnUpload.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image') && !file.type.startsWith('video')){
+      alert('Tipe file tidak didukung. Pilih gambar atau video.');
+      fileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const dataUrl = ev.target.result;
+      const type = file.type.startsWith('image') ? 'image' : 'video';
+      p.media = { type, src: dataUrl, source: 'file' };
+      btnUpload.disabled = true; urlInput.disabled = true; btnUrl.disabled = true; btnRemove.style.display = 'inline-block';
+      preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(dataUrl)}" />` : `<video src="${escapeAttr(dataUrl)}" controls></video>`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  btnUrl.addEventListener('click', ()=>{
+    const url = urlInput.value.trim();
+    if(!url){ alert('Masukkan URL terlebih dahulu.'); return; }
+    const lower = url.split('?')[0].toLowerCase();
+    const isImage = /\.(png|jpe?g|gif|webp|svg)$/i.test(lower);
+    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(lower);
+    const type = isVideo ? 'video' : 'image';
+    p.media = { type, src: url, source: 'url' };
+    btnUpload.disabled = true; urlInput.disabled = true; btnUrl.disabled = true; btnRemove.style.display = 'inline-block';
+    preview.innerHTML = type === 'image' ? `<img src="${escapeAttr(url)}" />` : `<video src="${escapeAttr(url)}" controls></video>`;
+  });
+
+  btnRemove.addEventListener('click', ()=>{
+    if(!p.media) return;
+    if(confirm('Hapus media paragraf ini?')){
+      p.media = null;
+      preview.innerHTML = '';
+      btnUpload.disabled = false; urlInput.disabled = false; btnUrl.disabled = false; btnRemove.style.display = 'none';
+    }
+  });
+
+  // --- Tombol Batal ---
+  document.getElementById(`in-cancel-${id}`).addEventListener('click', ()=>{
+    // Kembalikan data ke keadaan sebelum diedit
+    p.title = original.title;
+    p.content = original.content;
+    p.media = original.media;
+    // Tutup area edit dan render ulang
+    editArea.classList.add('hidden');
+    persist();
+    renderList();
+  });
+
+  // --- Tombol Simpan ---
+  document.getElementById(`in-save-${id}`).addEventListener('click', ()=>{
+    const newT = document.getElementById(`in-title-${id}`).value.trim();
+    const newC = document.getElementById(`in-content-${id}`).value.trim();
+    p.title = newT || 'Untitled';
+    p.content = newC;
+    persist();
+    renderList();
+  });
+
+  // --- Tombol Edit di Layar Penuh ---
+  document.getElementById(`in-full-${id}`).addEventListener('click', ()=>{
+    openFullEditor(id);
+  });
+}
+
+document.getElementById('closeModal').addEventListener('click', (e)=>{ e.preventDefault(); closeModal(); });
+document.getElementById('modalCancel').addEventListener('click', ()=> closeModal());
+document.getElementById('modalSave').addEventListener('click', ()=>{
+  if(!editingId) return;
+  const p = paragraphs.find(x=>x.id===editingId);
+  p.title = modalTitleInput.value.trim() || 'Untitled';
+  p.content = modalTextarea.value;
+  persist(); renderList();
+  modalStatus.textContent = 'Tersimpan';
+  setTimeout(()=> closeModal(), 300);
+});
+
+function closeModal(){
+  modalBackdrop.style.display = 'none';
+  modalBackdrop.setAttribute('aria-hidden','true');
+  editingId = null;
+}
+
+/* toolbar actions (simple text transforms) */
+document.getElementById('modalToolbar').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return; const act = btn.dataset.act; if(!act) return; transformTextarea(act);
+});
+function transformTextarea(action){
+  const ta = modalTextarea; const start = ta.selectionStart, end = ta.selectionEnd; const selected = ta.value.substring(start,end);
+  let replaced = selected;
+  if(action === 'bold') replaced = `**${selected||'bold text'}**`;
+  if(action === 'italic') replaced = `*${selected||'italic text'}*`;
+  if(action === 'ul') replaced = (selected||'List item').split('\n').map(l=>`- ${l}`).join('\n');
+  if(action === 'clear') replaced = '';
+  ta.setRangeText(replaced, start, end, 'end'); ta.focus();
+}
+
+/* helper: add paragraph */
+document.getElementById('addParagraphBtn').addEventListener('click', ()=>{
+  const newP = { id: genId(), title: 'Paragraf Baru', content: 'Tulis isi paragraf di sini...', media: null };
+  paragraphs.push(newP);
+  persist(); renderList();
+  setTimeout(()=>{ const card = document.querySelector(`.card[data-id="${newP.id}"]`); if(card) openInlineEditor(newP.id, card); },50);
+});
+
+/* preview button example: shows alert, replace with real preview route */
+document.getElementById('previewBtn').addEventListener('click', ()=>{
+  // simple preview: open new window with assembled HTML
+  const win = window.open('about:blank','_blank');
+  const html = buildPreviewHtml();
+  win.document.open(); win.document.write(html); win.document.close();
+});
+function buildPreviewHtml(){
+  // use current DOM span content for title (keeps in sync even after edit)
+  let body = `<h1>${escapeHtml(document.getElementById('materiTitle').textContent)}</h1>`;
+  paragraphs.forEach((p, idx)=>{
+    body += `<h3>${idx+1}. ${escapeHtml(p.title)}</h3>`;
+    body += `<p>${escapeHtml(p.content).replace(/\n/g,'<br/>')}</p>`;
+    if(p.media){
+      if(p.media.type === 'image') body += `<img style="max-width:720px; display:block; margin:8px 0;" src="${escapeAttr(p.media.src)}" />`;
+      if(p.media.type === 'video') body += `<video style="max-width:720px; display:block; margin:8px 0;" controls src="${escapeAttr(p.media.src)}"></video>`;
+    }
+  });
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Preview</title></head><body style="font-family:Arial,Helvetica,sans-serif; padding:24px">${body}</body></html>`;
+}
+
+/* persistence */
+function persist(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(paragraphs));
+    // NOTE: title is stored separately in TITLE_KEY; paragraph media stored as dataURL or URL
+  }catch(e){ console.warn('persist failed',e); }
+}
+
+/* utilities */
+function truncate(str, n){ if(!str) return ''; return (str.length>n)? str.slice(0,n).trim() + '…' : str; }
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escapeAttr(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function getIndex(id){ return paragraphs.findIndex(x=>x.id===id)+1; }
+
+/* init */
+renderList();
+
+</script>
+</body>
+</html>
