@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halaman Skor</title>
+  <style>
+
+:root {
+    --secondary: #6BA4B8;
+    --light: #D8E6ED;
+    --dark: #2F3E46;
+    --text: #2F3E46;
+    --primary: #A7C7D9;
+    --hover: #4D869C;
+    --card-bg: #f8f5ee;
+  }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: var(--dark);
+      padding: 15px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .score-box {
+      background: var(--light);
+      border-radius: 10px;
+      margin: 15px auto;
+      padding: 15px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .score-box div {
+      background: var(--primary);
+      border-radius: 10px;
+      padding: 20px;
+      flex: 1;
+      margin: 5px;
+    }
+
+    .score-box div p {
+      margin: 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .score-box div h2 {
+      margin: 5px 0;
+      color: var(--dark);
+    }
+
+    .total {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--dark);
+    }
+
+    .total span {
+      color: var(--hover);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .item {
+      border-radius: 8px;
+      border: 1px solid black;
+      padding: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: default;
+    }
+
+    .benar {
+      background-color: #2ecc71;
+    }
+
+    .salah {
+      background-color: #e74c3c;
+    }
+
+    .keterangan {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .kotak {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .btn-beranda {
+      background-color: var(--secondary);
+      color: var(--text);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-beranda:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-beranda svg {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Skor</header>
+
+  <div class="container">
+    <p class="total">Total Nilai<br><span>80 / 100</span></p>
+
+    <div class="score-box">
+      <div>
+        <h2>12</h2>
+        <p>Soal Benar</p>
+      </div>
+      <div>
+        <h2>3</h2>
+        <p>Soal Salah</p>
+      </div>
+    </div>
+
+    <h3>Detail Jawaban :</h3>
+    <div class="grid">
+      <div class="item benar">1</div>
+      <div class="item benar">2</div>
+      <div class="item salah">3</div>
+      <div class="item benar">4</div>
+      <div class="item benar">5</div>
+      <div class="item benar">6</div>
+      <div class="item salah">7</div>
+      <div class="item benar">8</div>
+      <div class="item benar">9</div>
+      <div class="item benar">10</div>
+      <div class="item benar">11</div>
+      <div class="item benar">12</div>
+      <div class="item benar">13</div>
+      <div class="item salah">14</div>
+      <div class="item benar">15</div>
+    </div>
+
+    <div class="keterangan">
+      <div><span class="kotak" style="background-color:#2ecc71;"></span> Soal Benar</div>
+      <div><span class="kotak" style="background-color:#e74c3c;"></span> Soal Salah</div>
+    </div>
+  </div>
+
+  <a href="dashboard_murid.html" class="btn-beranda" onclick="window.location.href='beranda.html'">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    Kembali Ke Beranda
+  </a>
+
+</body>
+</html>

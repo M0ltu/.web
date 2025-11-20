@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Login - Pengguna</title>
+<link rel="icon" type="image/png" href="logosmkn2.png">
+
+<style>
+  :root {
+    --bg1: #D8E6ED;
+    --bg2: #A7C7D9;
+    --card-bg: #F8F6F2;
+    --accent: #6BA4B8;
+    --accent-hover: #4D869C;
+    --text: #2F3E46;
+    --outline: #CBD7DD;
+    --light-text: #FAFAFA;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Poppins", system-ui, Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, var(--bg1), var(--bg2));
+  }
+
+  .login-wrapper {
+    width: 420px;
+    max-width: 92vw;
+    padding: 66px 32px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .logo {
+    width: 200px;
+    margin: -8px auto 6px;
+    display: block;
+  }
+
+  form { text-align: left; }
+
+  .field {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid var(--outline);
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    background-color: #fff;
+    color: var(--text);
+    transition: box-shadow .12s, border-color .12s;
+    -webkit-appearance: none; /* help remove browser decorations */
+    appearance: none;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(107, 164, 184, 0.12);
+  }
+
+  /* ===== Hide browser-native "reveal password" buttons =====
+     Cover several engines: Edge/IE (::-ms-reveal, ::-ms-clear)
+     and attempt common WebKit/Chromium hooks */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
+  /* Try to hide various WebKit/Chromium internal decoration pseudo-elements.
+     Different Blink/WebKit versions use different pseudo-elements; this
+     collection is usually sufficient. */
+  input[type="password"]::-webkit-textfield-decoration-container,
+  input[type="password"]::-webkit-textfield-decoration-button,
+  input[type="password"]::-webkit-password-reveal-button,
+  input[type="password"]::-webkit-password-decoration {
+    display: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Our custom toggle button */
+  .toggle-pass {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .toggle-pass svg { pointer-events: none; }
+
+  button.login-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: var(--light-text);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background .18s;
+  }
+
+  button.login-btn:hover {
+    background: var(--accent-hover);
+  }
+
+  p.error {
+    color: #c33;
+    font-size: 13px;
+    margin: 8px 0 0;
+    text-align: center;
+  }
+
+  @media (max-width:480px){
+    .login-wrapper{
+      width:90%;
+      padding:26px 18px;
+    }
+    .logo{ width:85px; }
+    input{ font-size:13.5px; }
+  }
+
+  @media (max-width:360px){
+    .login-wrapper{
+      width:100%;
+      padding:100px 14px;
+    }
+    input{ font-size:13px; }
+    button.login-btn{ font-size:13px; padding:9px; }
+  }
+</style>
+</head>
+<body>
+  <div class="login-wrapper" role="main" aria-labelledby="loginTitle">
+    <img class="logo" src="img/LOGIN-removebg-preview.png" alt="Ilustrasi pengguna">
+
+    <form id="loginForm" autocomplete="off" novalidate>
+      <div class="field">
+        <input id="username" name="username" type="text" placeholder="username" aria-label="username" autocomplete="username">
+      </div>
+
+      <div class="field">
+        <!-- beri autocomplete="new-password" agar browser tidak menampilkan beberapa kontrol autofill -->
+        <input id="password" name="password" type="password" placeholder="password" aria-label="password" autocomplete="new-password">
+        <button type="button" class="toggle-pass" id="togglePass" aria-pressed="false" aria-label="Tampilkan password">
+          <!-- icon "mata" default (initial) -->
+          <svg id="iconEye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+
+      <button class="login-btn" type="submit">Login</button>
+      <p id="errorMsg" class="error" aria-live="polite"></p>
+    </form>
+  </div>
+
+<script>
+  const CREDENTIALS = {
+    murid: { username: '112233', password: 'smpn3hebat', redirect: 'dashboard_murid.html' },
+    guru:  { username: '66666',  password: 'gurusmpn3bjm', redirect: 'dashboard_guru.html' }
+  };
+
+  const form = document.getElementById('loginForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const toggleBtn = document.getElementById('togglePass');
+  const passwordInput = document.getElementById('password');
+  const icon = document.getElementById('iconEye');
+
+  toggleBtn.addEventListener('click', function(){
+    const isHidden = passwordInput.type === 'password';
+    if(isHidden){
+      passwordInput.type = 'text';
+      toggleBtn.setAttribute('aria-pressed', 'true');
+      icon.innerHTML = '';
+      icon.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.8 18.8 0 0 1 5.1-5.94"></path>
+        <path d="M1 1l22 22"></path>
+        <path d="M9.53 9.53A3.5 3.5 0 0 0 12 15a3.5 3.5 0 0 0 3.47-2.53"></path>
+      </svg>`;
+    } else {
+      passwordInput.type = 'password';
+      toggleBtn.setAttribute('aria-pressed', 'false');
+      icon.innerHTML = '';
+      icon.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>`;
+    }
+  });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    errorMsg.textContent = '';
+
+    const username = document.getElementById('username').value.trim();
+    const password = passwordInput.value.trim();
+
+    if(!username || !password){
+      errorMsg.textContent = 'Harap isi semua kolom!';
+      return;
+    }
+
+    if(username === CREDENTIALS.murid.username && password === CREDENTIALS.murid.password){
+      alert('Login berhasil sebagai MURID 🎉');
+      window.location.href = CREDENTIALS.murid.redirect;
+    } else if(username === CREDENTIALS.guru.username && password === CREDENTIALS.guru.password){
+      alert('Login berhasil sebagai GURU 🎉');
+      window.location.href = CREDENTIALS.guru.redirect;
+    } else {
+      errorMsg.textContent = 'Username atau password salah!';
+    }
+  });
+</script>
+</body>
+</html>
